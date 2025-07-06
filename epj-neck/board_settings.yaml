@@ -1,4 +1,0 @@
-fqbn: esp32:esp32:esp32s3
-port: /dev/ttyACM0
-sketch: .
-baudrate: 115200

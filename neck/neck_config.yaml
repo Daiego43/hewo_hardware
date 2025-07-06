@@ -1,3 +1,10 @@
+board_settings:
+  fqbn: esp32:esp32:esp32s3
+  port: /dev/esp32
+  sketch: epj-neck
+  baudrate: 115200
+
+arduino_cli_path: None
 servo_settings:
     1:
         home_position: 0
