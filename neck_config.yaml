@@ -1,0 +1,16 @@
+servo_settings:
+    1:
+        home_position: 0
+        limits:
+          min: 0
+          max: 180
+    2:
+        home_position: 0
+        limits:
+          min: 0
+          max: 180
+    3:
+        home_position: 0
+        limits:
+          min: 0
+          max: 180
