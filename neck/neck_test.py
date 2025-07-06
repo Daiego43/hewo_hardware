@@ -7,10 +7,10 @@ from neck_control import NeckControl
 # === CONFIGURACIÓN GENERAL ===
 OFFSET = 90
 AMPLITUDE = 90
-FREQ = 0.25
+FREQ = 0.2
 WINDOW = 10
-FPS = 60
-MOVE_STEP = 5
+FPS = 20
+MOVE_STEP = 2
 
 # === INICIALIZACIÓN ===
 neck = NeckControl()
@@ -26,7 +26,7 @@ t_start = time.time()
 # === CÁLCULO DE ÁNGULOS INDIVIDUALES ===
 def generate_angles(t):
     angles = []
-    for cfg in servo_config1:
+    for cfg in servo_config:
         phase_t = t + cfg["dephase"]
         val = cfg["func"](2 * math.pi * FREQ * phase_t)
         angle = round(OFFSET + AMPLITUDE * val)
@@ -62,10 +62,10 @@ def main():
 
 if __name__ == '__main__':
     constant = lambda t: 0
-    servo_config1 = [
+    servo_config = [
         {"func": math.cos, "dephase": 0.0},
-        {"func": math.cos, "dephase": 0.25},
-        {"func": math.cos, "dephase": 0.5},
+        {"func": math.cos, "dephase": 0.2},
+        {"func": math.cos, "dephase": 0.4},
     ]
-    print(servo_config1)
+    print(servo_config)
     main()

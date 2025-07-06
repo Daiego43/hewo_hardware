@@ -10,7 +10,7 @@ const int servo1pin = 1;
 const int servo2pin = 45;
 const int servo3pin = 20;
 
-int pos1 = 0, pos2 = 0, pos3 = 0;
+int pos1 = 90, pos2 = 90, pos3 = 90;
 int target1 = 0, target2 = 0, target3 = 0;
 
 // Velocidad máxima de movimiento (grados por segundo)

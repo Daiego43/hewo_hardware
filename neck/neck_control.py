@@ -40,7 +40,19 @@ class NeckControl:
 
         self.move_step = 1
 
-    def send_command(self, timeout=1):
+    def send_command_smooth(self, timeout=1):
+        command = 'S {} {} {} {}'.format(
+            self.servo_1_angle.get_angle(),
+            self.servo_2_angle.get_angle(),
+            self.servo_3_angle.get_angle(),
+            self.move_step
+        )
+        with serial.Serial(self.port, self.baudrate, timeout=timeout) as ser:
+            ser.write((command + "\n").encode())
+            response = ser.readline().decode().strip()
+            return response
+
+    def send_command_direct(self, timeout=1):
         command = 'D {} {} {} {}'.format(
             self.servo_1_angle.get_angle(),
             self.servo_2_angle.get_angle(),
@@ -54,18 +66,25 @@ class NeckControl:
             print(f"Received: {response}")
             return response
 
+
     def move(self, servo_1_angle=0, servo_2_angle=0, servo_3_angle=0, move_step=1, timeout=1):
         self.servo_1_angle.set_angle(servo_1_angle)
         self.servo_2_angle.set_angle(servo_2_angle)
         self.servo_3_angle.set_angle(servo_3_angle)
         self.move_step = move_step
-        return self.send_command(timeout)
+        return self.send_command_smooth(timeout)
+
+    def move_direct(self, servo_1_angle=0, servo_2_angle=0, servo_3_angle=0, timeout=1):
+        self.servo_1_angle.set_angle(servo_1_angle)
+        self.servo_2_angle.set_angle(servo_2_angle)
+        self.servo_3_angle.set_angle(servo_3_angle)
+        return self.send_command_direct(timeout)
 
     def go_home(self):
         self.servo_1_angle.go_home()
         self.servo_2_angle.go_home()
         self.servo_3_angle.go_home()
-        return self.send_command()
+        return self.send_command_direct()
 
 if __name__ == '__main__':
     neck_control = NeckControl()
