@@ -34,7 +34,7 @@ class ServoFineController:
         self._log: List[list[float | int]] = []
         # Lleva al home físico y sincroniza estado interno
         try:
-            self.neck.go_home()
+            self.neck.go_home_smooth()
         except AttributeError:
             self.neck.move(*home_angles, timeout=0, move_step=self.move_step)
         self._current_angles = list(home_angles)
@@ -146,7 +146,7 @@ class ServoFineController:
     def go_home(self) -> None:
         self.move_enhanced(self._current_angles, steps=1)
         try:
-            self.neck.go_home()
+            self.neck.go_home_smooth()
             self._current_angles = [90, 90, 90]
         except AttributeError:
             pass
@@ -193,21 +193,30 @@ def ease_in_out_phi(x: float) -> float:
 # =====================================================================
 
 if __name__ == "__main__":
-    import random
-
     neck = NeckControl()
     ctl = ServoFineController(neck, move_step=2)
-
+    goals = []
+    servos = 3
+    for i in range(servos):
+        for v in [0, 45, 90, 135, 180]:
+            goal = [90, 90, 90]
+            goal[i] = v
+            goals.append(goal)
+        goals.append([90, 90, 90])
+    goals.append([0, 0, 0])
+    goals.append([180, 180, 180])
+    goals.append([90, 90, 90])
+    print("LEN GOALS:", len(goals))
     try:
-        for _ in range(5):
-            goal = [random.randint(0, 180) for _ in range(3)]
+        for goal in goals:
             print("GOAL →", goal)
             ctl.move_enhanced(goal,
                               freq=1.0,
-                              steps=20,
+                              steps=5,
                               func=ease_in_out_phi,
-                              move_step=1,
+                              move_step=20,
                               blocking=True)
+            print("GOAL alcanzado:", ctl.current)
     except KeyboardInterrupt:
         pass
     finally:

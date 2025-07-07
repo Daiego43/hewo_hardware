@@ -7,10 +7,10 @@ from neck_control import NeckControl
 # === CONFIGURACIÓN GENERAL ===
 OFFSET = 90
 AMPLITUDE = 90
-FREQ = 0.2
+FREQ = 0.1
 WINDOW = 10
-FPS = 20
-MOVE_STEP = 2
+FPS = 60
+MOVE_STEP = 1
 
 # === INICIALIZACIÓN ===
 neck = NeckControl()
@@ -50,9 +50,8 @@ def update(_):
 
 
 def main():
-    neck.go_home()
+    neck.go_home_smooth()
     print("Neck initialized and moved to home position.")
-    neck.go_home()
     try:
         ani = animation.FuncAnimation(fig, update, interval=1000 // FPS, blit=False)
         plt.show()
@@ -64,8 +63,8 @@ if __name__ == '__main__':
     constant = lambda t: 0
     servo_config = [
         {"func": math.cos, "dephase": 0.0},
-        {"func": math.cos, "dephase": 0.2},
-        {"func": math.cos, "dephase": 0.4},
+        {"func": math.cos, "dephase": 0.25},
+        {"func": math.cos, "dephase": 0.5},
     ]
     print(servo_config)
     main()

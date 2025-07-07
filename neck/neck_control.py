@@ -86,6 +86,12 @@ class NeckControl:
         self.servo_3_angle.go_home()
         return self.send_command_direct()
 
+    def go_home_smooth(self):
+        self.servo_1_angle.go_home()
+        self.servo_2_angle.go_home()
+        self.servo_3_angle.go_home()
+        return self.send_command_smooth()
+
 if __name__ == '__main__':
     neck_control = NeckControl()
     for angle in [0, 30, 60, 90, 120, 150, 180]:
