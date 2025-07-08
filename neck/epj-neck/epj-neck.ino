@@ -1,109 +1,45 @@
 #include <ESP32Servo.h>
 
-Servo servo1;
-Servo servo2;
-Servo servo3;
+#define STOP 95
 
-const int ledpin = 2;
+Servo s1, s2, s3;
+const int pin1 = 23;
+const int pin2 = 19;
+const int pin3 = 18;
 
-const int servo1pin = 1;
-const int servo2pin = 45;
-const int servo3pin = 20;
-
-int pos1 = 90, pos2 = 90, pos3 = 90;
-int target1 = 0, target2 = 0, target3 = 0;
-
-// Velocidad máxima de movimiento (grados por segundo)
-const int speedDegPerSec = 90;
-int stepSize = 2;  // Se puede modificar vía serial
+float v1, v2, v3;
 
 void setup() {
   Serial.begin(115200);
-
-  servo1.attach(servo1pin);
-  servo2.attach(servo2pin);
-  servo3.attach(servo3pin);
-  pinMode(ledpin, OUTPUT);
-
-  servo1.write(pos1);
-  servo2.write(pos2);
-  servo3.write(pos3);
-
-  digitalWrite(ledpin, LOW);
+  s1.attach(pin1);
+  s2.attach(pin2);
+  s3.attach(pin3);
+  stopAll();
+  Serial.println("🌀 Velocity-only servo firmware ready. Use: V pwm1 pwm2 pwm3");
 }
 
 void loop() {
   if (Serial.available()) {
-    String input = Serial.readStringUntil('\n');
-    input.trim();
-
-    if (input.startsWith("S")) {
-      int a1, a2, a3, sSize;
-      int matched = sscanf(input.c_str(), "S %d %d %d %d", &a1, &a2, &a3, &sSize);
-      if (matched >= 3) {
-        a1 = constrain(a1, 0, 180);
-        a2 = constrain(a2, 0, 180);
-        a3 = constrain(a3, 0, 180);
-        if (matched == 4) {
-          stepSize = constrain(sSize, 1, 20); // límites razonables
-        }
-
-        target1 = a1;
-        target2 = a2;
-        target3 = a3;
-        Serial.printf("Smooth move to: %d %d %d (step size %d)\n", target1, target2, target3, stepSize);
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+    if (cmd.startsWith("V ")) {
+      if (sscanf(cmd.c_str(), "V %f %f %f", &v1, &v2, &v3) == 3) {
+        int p1 = constrain((int)v1, 0, 180);
+        int p2 = constrain((int)v2, 0, 180);
+        int p3 = constrain((int)v3, 0, 180);
+        s1.write(p1);
+        s2.write(p2);
+        s3.write(p3);
+        Serial.printf("✅ Set PWM: %d, %d, %d\n", p1, p2, p3);
       } else {
-        Serial.println("Format: S <a1> <a2> <a3> [stepSize]");
-      }
-    } else if (input.startsWith("D")) {
-      int a1, a2, a3;
-      int matched = sscanf(input.c_str(), "D %d %d %d", &a1, &a2, &a3);
-      if (matched == 3) {
-        a1 = constrain(a1, 0, 180);
-        a2 = constrain(a2, 0, 180);
-        a3 = constrain(a3, 0, 180);
-
-        pos1 = target1 = a1;
-        pos2 = target2 = a2;
-        pos3 = target3 = a3;
-
-        servo1.write(pos1);
-        servo2.write(pos2);
-        servo3.write(pos3);
-
-        Serial.printf("Direct move to: %d %d %d\n", pos1, pos2, pos3);
-      } else {
-        Serial.println("Format: D <a1> <a2> <a3>");
+        Serial.println("❌ Invalid V format. Use: V pwm1 pwm2 pwm3");
       }
     }
   }
-
-  static unsigned long lastStep = 0;
-  unsigned long now = millis();
-  float stepDelayMs = 1000.0 / speedDegPerSec;
-
-  if (now - lastStep >= stepDelayMs) {
-    lastStep = now;
-    bool moving = false;
-
-    pos1 = moveSmooth(pos1, target1, servo1, moving);
-    pos2 = moveSmooth(pos2, target2, servo2, moving);
-    pos3 = moveSmooth(pos3, target3, servo3, moving);
-
-    digitalWrite(ledpin, moving ? HIGH : LOW);
-  }
 }
 
-int moveSmooth(int current, int target, Servo& s, bool &movingFlag) {
-  if (current == target) return current;
-
-  movingFlag = true;
-  int step = (target > current) ? stepSize : -stepSize;
-  if (abs(target - current) < abs(step)) {
-    current = target;
-  } else {
-    current += step;
-  }
-  s.write(current);
-  return current;
+void stopAll() {
+  s1.write(STOP);
+  s2.write(STOP);
+  s3.write(STOP);
 }

@@ -1,23 +1,30 @@
 board_settings:
-  fqbn: esp32:esp32:esp32s3
+  fqbn: esp32:esp32:esp32  # ESP32 normal
   port: /dev/esp32
   sketch: epj-neck
   baudrate: 115200
 
 arduino_cli_path: None
+
 servo_settings:
-    1:
-        home_position: 90
-        limits:
-          min: 0
-          max: 180
-    2:
-        home_position: 90
-        limits:
-          min: 0
-          max: 180
-    3:
-        home_position: 90
-        limits:
-          min: 0
-          max: 180
+  1:
+    type: continuous
+    default_power: 95
+    home_position: 95
+    limits:
+      min: 0
+      max: 360
+  2:
+    type: continuous
+    home_position: 95
+    default_power: 95
+    limits:
+      min: 0
+      max: 360
+  3:
+    type: continuous
+    default_power: 95
+    home_position: 95
+    limits:
+      min: 0
+      max: 360

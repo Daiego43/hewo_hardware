@@ -4,14 +4,14 @@ import os
 
 
 class Servo:
-    def __init__(self, home_position=0, limits=None):
+    def __init__(self, home_position=95, limits=None):
         self.angle = home_position
         self.home_position = home_position
         self.limits = limits or {'min': 0, 'max': 180}
 
     def set_angle(self, angle):
         if angle < self.limits['min'] or angle > self.limits['max']:
-            print(f"Rejected: angle {angle}° out of range [{self.limits['min']}, {self.limits['max']}]")
+            print(f"⚠️ Rejected: angle {angle}° out of range [{self.limits['min']}, {self.limits['max']}]")
             return
         self.angle = angle
 
@@ -20,7 +20,7 @@ class Servo:
 
     def go_home(self):
         self.set_angle(self.home_position)
-        print(f"Moved to home position: {self.home_position}°")
+        print(f"🏠 Moved to home position: {self.home_position}°")
 
 
 class NeckControl:
@@ -34,67 +34,48 @@ class NeckControl:
         self.baudrate = board.get('baudrate', 115200)
 
         servo_cfg = settings['servo_settings']
-        self.servo_1_angle = Servo(servo_cfg[1]['home_position'], servo_cfg[1]['limits'])
-        self.servo_2_angle = Servo(servo_cfg[2]['home_position'], servo_cfg[2]['limits'])
-        self.servo_3_angle = Servo(servo_cfg[3]['home_position'], servo_cfg[3]['limits'])
+        self.servo_1 = Servo(servo_cfg[1]['home_position'], servo_cfg[1]['limits'])
+        self.servo_2 = Servo(servo_cfg[2]['home_position'], servo_cfg[2]['limits'])
+        self.servo_3 = Servo(servo_cfg[3]['home_position'], servo_cfg[3]['limits'])
 
-        self.move_step = 1
+    def send(self, command, timeout=2):
+        try:
+            with serial.Serial(self.port, self.baudrate, timeout=timeout) as ser:
+                ser.reset_input_buffer()
+                ser.write((command + "\n").encode())
+                print(f"🛰️ Sent: {command}")
+                response = ser.readline().decode().strip()
+                print(f"📬 Received: {response}")
+                return response
+        except serial.SerialException as e:
+            print(f"❌ Serial error: {e}")
+            return None
 
-    def send_command_smooth(self, timeout=1):
-        command = 'S {} {} {} {}'.format(
-            self.servo_1_angle.get_angle(),
-            self.servo_2_angle.get_angle(),
-            self.servo_3_angle.get_angle(),
-            self.move_step
-        )
-        with serial.Serial(self.port, self.baudrate, timeout=timeout) as ser:
-            ser.write((command + "\n").encode())
-            response = ser.readline().decode().strip()
-            return response
-
-    def send_command_direct(self, timeout=1):
-        command = 'D {} {} {} {}'.format(
-            self.servo_1_angle.get_angle(),
-            self.servo_2_angle.get_angle(),
-            self.servo_3_angle.get_angle(),
-            self.move_step
-        )
-        with serial.Serial(self.port, self.baudrate, timeout=timeout) as ser:
-            ser.write((command + "\n").encode())
-            print(f"Sent: {command}")
-            response = ser.readline().decode().strip()
-            print(f"Received: {response}")
-            return response
-
-
-    def move(self, servo_1_angle=0, servo_2_angle=0, servo_3_angle=0, move_step=1, timeout=1):
-        self.servo_1_angle.set_angle(servo_1_angle)
-        self.servo_2_angle.set_angle(servo_2_angle)
-        self.servo_3_angle.set_angle(servo_3_angle)
-        self.move_step = move_step
-        return self.send_command_smooth(timeout)
-
-    def move_direct(self, servo_1_angle=0, servo_2_angle=0, servo_3_angle=0, timeout=1):
-        self.servo_1_angle.set_angle(servo_1_angle)
-        self.servo_2_angle.set_angle(servo_2_angle)
-        self.servo_3_angle.set_angle(servo_3_angle)
-        return self.send_command_direct(timeout)
+    def set_velocity(self, v1=95, v2=95, v3=95):
+        # v1, v2, v3 deben ser enteros entre 0 y 180
+        v1 = max(0, min(180, int(v1)))
+        v2 = max(0, min(180, int(v2)))
+        v3 = max(0, min(180, int(v3)))
+        cmd = f"V {v1} {v2} {v3}"
+        return self.send(cmd)
 
     def go_home(self):
-        self.servo_1_angle.go_home()
-        self.servo_2_angle.go_home()
-        self.servo_3_angle.go_home()
-        return self.send_command_direct()
+        return self.set_velocity(
+            self.servo_1.home_position,
+            self.servo_2.home_position,
+            self.servo_3.home_position
+        )
 
-    def go_home_smooth(self):
-        self.servo_1_angle.go_home()
-        self.servo_2_angle.go_home()
-        self.servo_3_angle.go_home()
-        return self.send_command_smooth()
 
 if __name__ == '__main__':
-    neck_control = NeckControl()
-    for angle in [0, 30, 60, 90, 120, 150, 180]:
-        neck_control.move(angle, angle, angle, timeout=1)
+    neck = NeckControl()
+    import time
+    print("📦 TEST SEQUENCE: set speed, stop, home")
 
-    neck_control.go_home()
+    while True:
+        input("🛑 ENTER to set custom velocity...")
+        neck.set_velocity(180, 180, 180)  # Ejemplo: cada motor diferente
+        input("🛑 ENTER to set custom velocity...")
+        neck.set_velocity(0, 0, 0)  # Ejemplo: cada motor diferente
+        input("✋ ENTER to stop all...")
+        neck.go_home()

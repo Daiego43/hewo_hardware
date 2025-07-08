@@ -3,10 +3,10 @@
 set -e
 
 RULE_PATH="/etc/udev/rules.d/99-esp32.rules"
-PORT=$(ls /dev/ttyACM* 2>/dev/null | head -n1)
+PORT=$(ls /dev/ttyUSB* /dev/ttyACM* 2>/dev/null | head -n1)
 
 if [ -z "$PORT" ]; then
-  echo "❌ No ESP32 device found on /dev/ttyACM*"
+  echo "❌ No ESP32 device found on /dev/ttyUSB* or /dev/ttyACM*"
   exit 1
 fi
 
