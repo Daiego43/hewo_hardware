@@ -9,22 +9,22 @@ arduino_cli_path: None
 servo_settings:
   1:
     type: continuous
-    default_power: 95
-    home_position: 95
-    limits:
-      min: 0
-      max: 360
+    degrees_per_second: 500
+    stop_vel: 94
+    init_vel: 95
+    min_pwm: 0
+    max_pwm: 180
   2:
     type: continuous
-    home_position: 95
-    default_power: 95
-    limits:
-      min: 0
-      max: 360
+    degrees_per_second: 500
+    stop_vel: 93
+    init_vel: 95
+    min_pwm: 0
+    max_pwm: 180
   3:
     type: continuous
-    default_power: 95
-    home_position: 95
-    limits:
-      min: 0
-      max: 360
+    degrees_per_second: 500
+    stop_vel: 93
+    init_vel: 95
+    min_pwm: 0
+    max_pwm: 180

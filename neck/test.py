@@ -1,54 +1,65 @@
 import time
 import math
-from neck_control import NeckControl  # Asegúrate de que el script esté en el mismo directorio o PYTHONPATH
+from neck_control import NeckServoController  # Asegúrate de que el nombre sea correcto
 
-neck = NeckControl()
-def sinusoidal_motion(duration=10, freq=0.5, servo_index=1, amplitude=85, base=95):
+def sinusoidal_motion(ctrl, servo_index, duration=10, freq=0.5, amplitude=85, base=95):
     """
-    Mueve un servo con velocidad sinusoidal.
+    Mueve un servo con velocidad PWM sinusoidal.
 
+    :param ctrl: instancia de NeckServoController
+    :param servo_index: Índice del servo (0, 1, 2)
     :param duration: Duración total en segundos
     :param freq: Frecuencia de la onda (Hz)
-    :param servo_index: Servo a controlar (1, 2 o 3)
-    :param amplitude: Amplitud máxima de desviación desde el valor base (PWM)
-    :param base: Valor base de velocidad (por defecto 95 = parado)
+    :param amplitude: Máxima desviación desde el valor base
+    :param base: PWM base (normalmente 95 = stop)
     """
+    print(f"🎢 Sinusoidal motion on servo {servo_index} for {duration}s")
     start = time.time()
 
-    print(f"🎢 Sinusoidal motion on servo {servo_index} for {duration}s")
     while time.time() - start < duration:
         t = time.time() - start
-        velocity = int(90 + 90 * math.sin(2 * math.pi * freq * t))
+        pwm = int(base + amplitude * math.sin(2 * math.pi * freq * t))
 
-        # Garantizar rango válido
-        velocity = max(0, min(180, velocity))
+        # Asegura que esté dentro del rango válido
+        pwm = max(0, min(180, pwm))
 
-        v1 = v2 = v3 = base
-        if servo_index == 1:
-            v1 = velocity
-        elif servo_index == 2:
-            v2 = velocity
-        elif servo_index == 3:
-            v3 = velocity
-
-        neck.set_velocity(v1, v2, v3)
-        time.sleep(0.02)  # ~50Hz
+        # Aplica solo al servo indicado
+        ctrl.set_pwm_index(servo_index, pwm)
+        time.sleep(0.02)  # 50Hz
 
     print("🛑 Stopping...")
-    neck.go_home()
-    neck.go_home()
-    neck.go_home()
-    neck.go_home()
-    neck.go_home()
+    ctrl.servo_list[servo_index].stop()
+    ctrl.set_pwm_index(servo_index, ctrl.servo_list[servo_index].get_pwm())
+
+def stepped_motion(ctrl, servo_index, target_angle, direction='clock'):
+    """
+    Mueve un servo a una posición específica con un paso.
+
+    :param ctrl: instancia de NeckServoController
+    :param servo_index: Índice del servo (0, 1, 2)
+    :param target_angle: Ángulo objetivo en grados
+    :param direction: Dirección del movimiento ('clock' o 'antic')
+    """
+    print(f"🚀 Stepped motion on servo {servo_index} to {target_angle}° in direction {direction}")
+    ctrl.servo_list[servo_index].step_to(target_angle, direction)
 
 
 if __name__ == '__main__':
-
-    sinusoidal_motion(duration=2, freq=0.2, servo_index=1, amplitude=10)
-    sinusoidal_motion(duration=2, freq=0.2, servo_index=2, amplitude=10)
-    sinusoidal_motion(duration=2, freq=0.2, servo_index=3, amplitude=10)
-    neck.set_velocity(0,0,0)
+    ctrl = NeckServoController("neck_config.yaml")
+    ctrl.stop_all()
     time.sleep(1)
-    neck.set_velocity(180,180,180)
-    time.sleep(1)
-    neck.go_home()
+    try:
+        # for i in [0, 45, 90, 135, 180, 225,270, 315, 360]:
+        #     stepped_motion(ctrl, servo_index=0, target_angle=i, direction='clock')
+        #     time.sleep(0.2)
+        # for i in [0, 45, 90, 135, 180, 225,270, 315, 360]:
+        #     stepped_motion(ctrl, servo_index=0, target_angle=i, direction='antic')
+        #     time.sleep(0.2)
+        sinusoidal_motion(ctrl, servo_index=0, duration=5, freq=1, amplitude=85)
+        ctrl.stop_all()
+    finally:
+        ctrl.stop_all()
+        ctrl.stop_all()
+        ctrl.stop_all()
+        ctrl.stop_all()
+        ctrl.close()
