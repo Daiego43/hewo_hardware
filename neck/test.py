@@ -27,10 +27,6 @@ def sinusoidal_motion(ctrl, servo_index, duration=10, freq=0.5, amplitude=85, ba
         ctrl.set_pwm_index(servo_index, pwm)
         time.sleep(0.02)  # 50Hz
 
-    print("🛑 Stopping...")
-    ctrl.servo_list[servo_index].stop()
-    ctrl.set_pwm_index(servo_index, ctrl.servo_list[servo_index].get_pwm())
-
 def stepped_motion(ctrl, servo_index, target_angle, direction='clock'):
     """
     Mueve un servo a una posición específica con un paso.
@@ -55,11 +51,9 @@ if __name__ == '__main__':
         # for i in [0, 45, 90, 135, 180, 225,270, 315, 360]:
         #     stepped_motion(ctrl, servo_index=0, target_angle=i, direction='antic')
         #     time.sleep(0.2)
-        sinusoidal_motion(ctrl, servo_index=0, duration=5, freq=1, amplitude=85)
+        sinusoidal_motion(ctrl, servo_index=0, duration=5, freq=0.2, amplitude=85)
+        print("🛑 Stopping...")
         ctrl.stop_all()
     finally:
-        ctrl.stop_all()
-        ctrl.stop_all()
-        ctrl.stop_all()
         ctrl.stop_all()
         ctrl.close()

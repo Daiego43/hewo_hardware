@@ -117,6 +117,7 @@ class NeckServoController:
         for s in self.servo_list:
             s.stop()
         self.set_pwm([s.get_pwm() for s in self.servo_list])
+        self.set_pwm([s.get_pwm() for s in self.servo_list])
 
     def close(self):
         self.ser.close()
