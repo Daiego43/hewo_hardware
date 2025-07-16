@@ -1,0 +1,74 @@
+# Configuración de placa ESP32
+board_settings:
+  fqbn: esp32:esp32:esp32s3  # ESP32 normal
+  port: /dev/esp32         # Serial port
+  sketch: epj-neck         # sketch name
+  ino_file: epj-neck/epj-neck.ino  # ino_file path
+  baudrate: 115200         # Serial channel communication speed
+
+# Path to arduino cli executable
+arduino_cli_path: /usr/local/bin/arduino-cli
+
+# Global servo config
+servo_defaults:
+  stop_pwm: 95             # Neutral velocity
+  max_cw_pwm: 180          # Maximum clockwise velocity
+  max_ccw_pwm: 0           # Maximum counter-clockwise velocity
+  degrees_per_second: 600  # Default servo velocity
+
+# Specific servo configurations
+servo_settings:
+  1:  # DC servo motor. (Modified sg 90)
+    type: continuous_rotation
+    gpio: 6
+    degrees_per_second: 600
+    calibration_factor: 1.2  # For this servo
+    min_move_threshold: 0.5  # Min move
+    deadzone: 2              # Zona muerta PWM
+    # PWM Signal configuration for this servo
+    pwm_config:
+      stop: 95
+      max_cw: 140
+      max_ccw: 50
+    safety_limits:
+      max_rotation_time_ms: 5000
+  2:
+    type: continuous_rotation
+    gpio: 16
+    degrees_per_second: 600
+    calibration_factor: 1.2
+    min_move_threshold: 0.5
+    deadzone: 2
+    pwm_config:
+      stop: 95
+      max_cw: 140
+      max_ccw: 50
+    safety_limits:
+      max_rotation_time_ms: 5000
+  3:
+    type: continuous_rotation
+    gpio: 18
+    degrees_per_second: 600
+    calibration_factor: 1.2
+    min_move_threshold: 0.5
+    deadzone: 2
+    pwm_config:
+      stop: 95
+      max_cw: 140
+      max_ccw: 50
+    safety_limits:
+      max_rotation_time_ms: 5000
+
+communication:
+  serial_timeout_ms: 1000
+  command_buffer_size: 64
+
+safety:
+  enable_watchdog: true
+  max_idle_time_ms: 30000
+  emergency_stop_pin: -1
+
+debug:
+  verbose_output: true
+  show_timing: false
+  log_commands: true

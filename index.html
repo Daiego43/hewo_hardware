@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SPJ Platform</title>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    h1 { color: #333; }
+    .servo-control { margin-bottom: 15px; }
+    input[type="number"] { width: 60px; }
+    button { margin-right: 5px; margin-top: 5px; }
+  </style>
+</head>
+<body>
+<h1>SPJ Platform Control</h1>
+
+<!-- Comando manual -->
+<form action="/cmd">
+  <input name="q" size="40">
+  <input type="submit" value="Send serial command">
+</form>
+<p>Ejemplos: <code>A 10 -5 5</code>, <code>S</code>, <code>R</code></p>
+
+<hr>
+
+<!-- Control de movimiento relativo -->
+<h2>Degree control(A)</h2>
+<div class="servo-control">
+  <p>Servo 1: <span id="v1">0</span>°</p>
+  <button onclick="adjust(1, 5)">↻ +5°</button>
+  <button onclick="adjust(1, -5)">↺ -5°</button>
+</div>
+<div class="servo-control">
+  <p>Servo 2: <span id="v2">0</span>°</p>
+  <button onclick="adjust(2, 5)">↻ +5°</button>
+  <button onclick="adjust(2, -5)">↺ -5°</button>
+</div>
+<div class="servo-control">
+  <p>Servo 3: <span id="v3">0</span>°</p>
+  <button onclick="adjust(3, 5)">↻ +5°</button>
+  <button onclick="adjust(3, -5)">↺ -5°</button>
+</div>
+<button onclick="sendA()">Aplicar cambios</button>
+<button onclick="resetVirtual()">Reiniciar virtual a 0°</button>
+<script>
+  let v = [0, 0, 0];
+
+  function adjust(idx, delta) {
+    v[idx - 1] += delta;
+    document.getElementById("v" + idx).innerText = v[idx - 1];
+  }
+
+  function sendA() {
+    let cmd = `A ${v[0]} ${v[1]} ${v[2]}`;
+    fetch(`/cmd?q=${cmd}`).then(r => r.text()).then(alert);
+  }
+
+  function resetVirtual() {
+    v = [0, 0, 0];
+    for (let i = 1; i <= 3; i++) document.getElementById("v" + i).innerText = "0";
+  }
+</script>
+</body>
+</html>
