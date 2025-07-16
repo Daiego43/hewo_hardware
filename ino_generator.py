@@ -41,5 +41,5 @@ if __name__ == '__main__':
         config_path='neck_config.yaml',
         template_path='ino_template.ino',
         output_path='epj-neck/epj-neck.ino',
-        html_path='index.html'
+        html_path='index_minified.html'
     )

@@ -5,9 +5,6 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-# Importar el generador de código (asumiendo que está en el mismo directorio)
-from ino_generator import InoCodeGenerator
-
 WORKDIR = Path(__file__).parent.absolute()
 DEFAULT_CONFIG = WORKDIR / 'neck_config.yaml'
 DEFAULT_DEV = "/dev/esp32"
@@ -28,8 +25,6 @@ class FirmwareFlasher:
         self.port = self._resolve_port()
         self.baudrate = self.board.get('baudrate', DEFAULT_BAUDRATE)
 
-        # Inicializar generador de código
-        self.code_generator = InoCodeGenerator(str(self.config_file))
 
     def _load_settings(self) -> Dict[str, Any]:
         """Carga la configuración desde el archivo YAML"""
@@ -94,24 +89,6 @@ class FirmwareFlasher:
                 print(f"   Stderr: {e.stderr}")
             raise
 
-    def generate_ino(self) -> bool:
-        """Genera el código .ino usando el generador mejorado"""
-        try:
-            print("🔧 Generando código .ino desde configuración YAML...")
-
-            # Mostrar resumen de configuración
-            print(self.code_generator.get_servo_summary())
-
-            # Generar archivo
-            success = self.code_generator.save_ino_file(str(self.ino_file))
-
-            if success:
-                print("✅ Código .ino generado exitosamente")
-            return success
-
-        except Exception as e:
-            print(f"❌ Error generando código .ino: {e}")
-            return False
 
     def validate_config(self) -> bool:
         """Valida la configuración antes de proceder"""
@@ -174,10 +151,6 @@ class FirmwareFlasher:
             if not self.validate_config():
                 return False
 
-            # Generar código .ino
-            if not self.generate_ino():
-                return False
-
             # Compilar
             if not self.compile():
                 return False
@@ -215,9 +188,6 @@ class FirmwareFlasher:
         print(f"   📡 Baudrate:     {self.baudrate}")
         print(f"   🛠️  CLI path:     {self.arduino_cli}")
         print()
-
-        # Mostrar configuración de servos
-        print(self.code_generator.get_servo_summary())
 
     def restore_backup(self) -> bool:
         """Restaura el archivo .ino desde el backup"""
@@ -335,7 +305,7 @@ def main():
         if args.command == "flash":
             success = flasher.flash()
         elif args.command == "compile":
-            success = flasher.generate_ino() and flasher.compile()
+            success = flasher.compile()
         elif args.command == "upload":
             success = flasher.upload()
         elif args.command == "monitor":
@@ -344,8 +314,6 @@ def main():
         elif args.command == "settings":
             flasher.show_settings()
             success = True
-        elif args.command == "generate":
-            success = flasher.generate_ino()
         elif args.command == "restore":
             success = flasher.restore_backup()
         elif args.command == "clean":

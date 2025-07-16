@@ -190,6 +190,7 @@ void process_command(String cmd) {
 }
 
 // ---------- Web Server ----------
+{{INDEX_HTML}}
 void handleRoot() {
   server.send(200, "text/html", index_html);
 }
@@ -203,8 +204,6 @@ void handleCommand() {
     server.send(400, "text/plain", "❌ Falta 'q'");
   }
 }
-
-{{INDEX_HTML}}
 
 // ---------- Setup ----------
 void setup() {
